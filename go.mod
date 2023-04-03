@@ -1,4 +1,4 @@
-module subsift
+module github.com/c3l3si4n/subsift
 
 go 1.20
 
