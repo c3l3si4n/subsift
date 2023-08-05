@@ -12,6 +12,17 @@ import (
 	"github.com/miekg/dns"
 )
 
+var nameservers = []string{
+	"1.1.1.1:53",
+	"1.0.0.1:53",
+	"8.8.8.8:53",
+	"8.8.4.4:53",
+	"9.9.9.9:53",
+}
+
+var index = 0
+var indexLock = sync.Mutex{}
+
 func main() {
 
 	log.SetOutput(os.Stderr)
@@ -131,14 +142,11 @@ func GetRandomNameserver() string {
 		76.223.122.150
 		76.76.19.19
 	*/
-	nameservers := []string{
-		"1.1.1.1:53",
-		"1.0.0.1:53",
-		"8.8.8.8:53",
-		"8.8.4.4:53",
-		"9.9.9.9:53",
-	}
-	return nameservers[rand.Intn(len(nameservers))]
+	nameserver := nameservers[index%len(nameservers)]
+	indexLock.Lock()
+	index++
+	indexLock.Unlock()
+	return nameserver
 
 }
 
@@ -150,7 +158,7 @@ func ParseSubdomains(subdomains []string) []string {
 	wg := &sync.WaitGroup{}
 	subdomainChan := make(chan string)
 	// worker pool
-	numWorkers := 110
+	numWorkers := 100
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
 		go func() {
