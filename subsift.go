@@ -59,9 +59,7 @@ func ResolveDomain(domain string) (bool, error) {
 	}
 
 	if r.Rcode != dns.RcodeSuccess {
-		if r.Rcode != dns.RcodeNameError {
-			return ResolveDomain(domain)
-		}
+
 		return false, nil
 	}
 
