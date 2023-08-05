@@ -15,34 +15,9 @@ import (
 var nameservers = []string{
 	"1.0.0.1:53",
 	"1.1.1.1:53",
-	"134.195.4.2:53",
-	"149.112.112.112:53",
-	"185.228.168.9:53",
-	"185.228.169.9:53",
-	"195.46.39.39:53",
-	"195.46.39.40:53",
-	"205.171.2.65:53",
-	"205.171.3.65:53",
-	"208.67.220.220:53",
-	"208.67.222.222:53",
-	"216.146.35.35:53",
-	"216.146.36.36:53",
-	"64.6.64.6:53",
-	"64.6.65.6:53",
-	"74.82.42.42:53",
-	"76.223.122.150:53",
-	"76.76.10.0:53",
-	"76.76.19.19:53",
-	"76.76.2.0:53",
-	"77.88.8.1:53",
-	"77.88.8.8:53",
-	"8.20.247.20:53",
-	"8.26.56.26:53",
 	"8.8.4.4:53",
 	"8.8.8.8:53",
 	"9.9.9.9:53",
-	"94.140.14.14:53",
-	"94.140.15.15:53",
 }
 
 var index = 0
@@ -77,7 +52,6 @@ func ResolveDomain(domain string) (bool, error) {
 		log.Printf("DNS query failed: %s\n", err.Error())
 		// check if timeout
 		if strings.Contains(err.Error(), "i/o timeout") {
-			log.Default().Println("retrying scan for " + domain)
 			return ResolveDomain(domain)
 		}
 
@@ -85,20 +59,15 @@ func ResolveDomain(domain string) (bool, error) {
 	}
 
 	if r.Rcode != dns.RcodeSuccess {
-		log.Default().Println("returned false due to no Success", r.Rcode)
 		if r.Rcode != dns.RcodeNameError {
-			log.Default().Println(r.Rcode)
-			log.Default().Println("retrying scan for " + domain)
 			return ResolveDomain(domain)
 		}
 		return false, nil
 	}
 
 	if len(r.Answer) < 1 {
-		log.Default().Println("returned false due to no answers")
 		return false, nil
 	}
-	log.Default().Println("resolved " + domain)
 	return true, nil
 }
 
@@ -117,10 +86,8 @@ func ResolveDomainRetry(domain string, retries int) bool {
 func TestDomainForWildcards(domain string, wildcardMap map[string]bool, mu *sync.Mutex) bool {
 	subdomainToTest := GenerateRandLowercaseString() + "." + domain
 	if found := ResolveDomainRetry(subdomainToTest, 3); found {
-		log.Default().Printf("TestDomainForWildcards %s wildcard.", domain)
 		return true
 	} else {
-		log.Default().Printf("TestDomainForWildcards %s  !wildcard.", domain)
 
 		return false
 	}
@@ -210,7 +177,6 @@ func ParseSubdomains(subdomains []string) []string {
 				}
 
 				if !ok {
-					log.Default().Println("Checking for zone: " + zone)
 
 					isWildcardZone := TestDomainForWildcards(zone, wildcardMap, &mu)
 					mu.Lock()
