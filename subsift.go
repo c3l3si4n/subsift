@@ -17,7 +17,6 @@ var nameservers = []string{
 	"1.1.1.1:53",
 	"134.195.4.2:53",
 	"149.112.112.112:53",
-	"159.89.120.99:53",
 	"185.228.168.9:53",
 	"185.228.169.9:53",
 	"195.46.39.39:53",
@@ -41,11 +40,7 @@ var nameservers = []string{
 	"8.26.56.26:53",
 	"8.8.4.4:53",
 	"8.8.8.8:53",
-	"84.200.69.80:53",
-	"84.200.70.40:53",
-	"89.233.43.71:53",
 	"9.9.9.9:53",
-	"91.239.100.100:53",
 	"94.140.14.14:53",
 	"94.140.15.15:53",
 }
@@ -76,7 +71,6 @@ func ResolveDomain(domain string) (bool, error) {
 	m.SetQuestion(dns.Fqdn(domain), dns.TypeA)
 	// set timeout
 	c.Net = "udp"
-	c.DialTimeout = 1000 * 1000
 	m.RecursionDesired = true
 	r, _, err := c.Exchange(m, GetRandomNameserver())
 	if err != nil {
@@ -89,14 +83,17 @@ func ResolveDomain(domain string) (bool, error) {
 
 		return false, nil
 	}
+
 	if r.Rcode != dns.RcodeSuccess {
 		log.Default().Println("returned false due to no Success", r.Rcode)
+		if r.Rcode != dns.RcodeNameError {
+			log.Default().Println(r.Rcode)
+			log.Default().Println("retrying scan for " + domain)
+			return ResolveDomain(domain)
+		}
 		return false, nil
 	}
-	if r.Rcode != dns.RcodeNameError {
-		log.Default().Println("retrying scan for " + domain)
-		return ResolveDomain(domain)
-	}
+
 	if len(r.Answer) < 1 {
 		log.Default().Println("returned false due to no answers")
 		return false, nil
