@@ -189,7 +189,6 @@ func ParseSubdomains(subdomains []string) []string {
 				isWildcardSubdomain := TestDomainForWildcards(subdomain, wildcardMap, &mu)
 				if !isWildcardSubdomain {
 					mu.Lock()
-					log.Default().Println("Adding ", subdomain)
 					parsedSubdomains = append(parsedSubdomains, subdomain)
 					mu.Unlock()
 				}
